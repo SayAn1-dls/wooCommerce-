@@ -94,8 +94,13 @@ export async function runChat(userId: number, history: { role: 'user' | 'assista
   // each round is one LLM call; the cap on rounds is a backstop in case a model never stops
   for (let round = 0; round < MAX_TOOL_CALLS + 2; round++) {
     // once the budget is spent, offer no tools so the model has to answer in text
-    const msg = await complete(messages, calls.length < MAX_TOOL_CALLS ? tools : undefined)
-    if (!msg.tool_calls?.length) return { reply: msg.content?.trim() || '(no answer)', toolCalls: calls }
+    const offered = calls.length < MAX_TOOL_CALLS ? tools : undefined
+    let msg = await complete(messages, offered)
+    // small local models sometimes return nothing at all; one retry usually fixes it
+    if (!msg.tool_calls?.length && !msg.content?.trim()) msg = await complete(messages, offered)
+    if (!msg.tool_calls?.length) {
+      return { reply: msg.content?.trim() || 'The model returned an empty answer. Try asking again.', toolCalls: calls }
+    }
 
     messages.push({ role: 'assistant', content: msg.content ?? null, tool_calls: msg.tool_calls })
     for (const tc of msg.tool_calls) {
