@@ -13,6 +13,7 @@ export const config = {
   notesToken: process.env.NOTES_MCP_TOKEN || '',
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || '',
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD || '',
+  seedAdminName: process.env.SEED_ADMIN_NAME || 'Admin',
   remote: {
     slug: process.env.REMOTE_SERVER_SLUG || 'deepwiki',
     name: process.env.REMOTE_SERVER_NAME || 'DeepWiki',

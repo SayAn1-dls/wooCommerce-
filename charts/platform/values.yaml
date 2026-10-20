@@ -50,6 +50,7 @@ gateway:
   replicas: 1
   existingSecret: ""
   seedAdminEmail: admin@example.com
+  seedAdminName: Admin
   # set with --set gateway.seedAdminPassword=... or use existingSecret
   seedAdminPassword: ""
   allowedInternalHosts:

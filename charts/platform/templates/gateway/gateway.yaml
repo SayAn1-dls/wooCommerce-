@@ -60,6 +60,8 @@ spec:
               value: {{ .Values.gateway.remoteServer.url }}
             - name: STORE_TIMEZONE
               value: {{ .Values.storeTimezone }}
+            - name: SEED_ADMIN_NAME
+              value: {{ .Values.gateway.seedAdminName | quote }}
             - name: SECURE_COOKIES
               value: {{ .Values.ingress.tls | quote }}
           ports:

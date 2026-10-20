@@ -3,7 +3,7 @@
 # Safe to run again: it reuses the cluster, rebuilds images and upgrades the release.
 #   scripts/dev-up.sh            hosted LLM (put a key in later, see TODO-FOR-ME.md)
 #   OLLAMA=1 scripts/dev-up.sh   chat uses the Ollama running on this laptop
-#   ADMIN_EMAIL=asha@app.localhost scripts/dev-up.sh   seed admin email (first run only)
+#   ADMIN_EMAIL=asha@app.localhost ADMIN_NAME=Asha scripts/dev-up.sh   seed admin (first run only)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -56,6 +56,7 @@ helm upgrade --install platform charts/platform -n "$NS" --create-namespace \
   -f charts/platform/values-local.yaml ${extra[@]+"${extra[@]}"} \
   --set gateway.seedAdminEmail="$admin_email" \
   --set gateway.seedAdminPassword="$admin_password" \
+  --set gateway.seedAdminName="${ADMIN_NAME:-Admin}" \
   --timeout 20m >/dev/null
 
 # pick up freshly imported :dev images even when the chart itself did not change

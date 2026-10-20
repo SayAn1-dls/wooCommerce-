@@ -12,7 +12,7 @@ export async function seed() {
     if (admins.length === 0) {
       await db.insert(users).values({
         email,
-        name: 'Admin',
+        name: config.seedAdminName,
         role: 'admin',
         passwordHash: await hashPassword(config.seedAdminPassword),
       })
