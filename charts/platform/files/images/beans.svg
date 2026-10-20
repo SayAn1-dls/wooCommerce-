@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#efe3d3"/>
+      <stop offset="1" stop-color="#d9c2a5"/>
+    </linearGradient>
+    <linearGradient id="pouch" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3b2a20"/>
+      <stop offset="1" stop-color="#5a4030"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="670" rx="240" ry="26" fill="#000" opacity="0.1"/>
+  <path d="M270 200 L530 200 L560 660 L240 660 Z" fill="url(#pouch)"/>
+  <rect x="270" y="180" width="260" height="40" rx="6" fill="#2a1d16"/>
+  <rect x="300" y="340" width="200" height="150" rx="12" fill="#f5ead9"/>
+  <text x="400" y="405" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#3b2a20" text-anchor="middle">COFFEE</text>
+  <text x="400" y="450" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#7a5a43" text-anchor="middle">250 g</text>
+  <g fill="#6b4226">
+    <ellipse cx="160" cy="610" rx="34" ry="24" transform="rotate(-25 160 610)"/>
+    <ellipse cx="640" cy="620" rx="34" ry="24" transform="rotate(20 640 620)"/>
+    <ellipse cx="610" cy="560" rx="30" ry="21" transform="rotate(-40 610 560)"/>
+  </g>
+  <g stroke="#3b2414" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M140 600 Q160 610 180 620" transform="rotate(-25 160 610)"/>
+    <path d="M620 610 Q640 620 660 630" transform="rotate(20 640 620)"/>
+  </g>
+</svg>

@@ -63,6 +63,27 @@ add_product "Cotton T-Shirt" 499 "Plain white cotton t-shirt."
 add_product "Coffee Beans 250g" 350 "Medium roast, whole beans."
 add_product "Canvas Tote Bag" 299 "Sturdy tote for groceries."
 
+# Product pictures ship with the chart (files/images) because WordPress has no
+# internet access. Only set when a product has none, so admin changes stick.
+add_image() {
+  local id
+  id=$(wp post list --post_type=product --title="$1" --format=ids)
+  [ -z "$id" ] && return 0
+  if [ -z "$(wp post meta get "$id" _thumbnail_id 2>/dev/null || true)" ]; then
+    wp media import "/images/$2" --post_id="$id" --featured_image --title="$1" --porcelain
+  fi
+}
+add_image "Cotton T-Shirt" tshirt.jpg
+add_image "Coffee Beans 250g" beans.jpg
+add_image "Canvas Tote Bag" tote.jpg
+
+# a friendlier picture for products that have none, e.g. ones made through the chat
+placeholder=$(wp post list --post_type=attachment --post_status=inherit --title="mcpg-placeholder" --format=ids)
+if [ -z "$placeholder" ]; then
+  placeholder=$(wp media import /images/product.jpg --title="mcpg-placeholder" --porcelain)
+fi
+wp option update woocommerce_placeholder_image "$placeholder"
+
 # REST key for woo-mcp. Reuse the one in the woo-api Secret if WooCommerce
 # still knows it, otherwise make a new one and write it back.
 API=https://kubernetes.default.svc/api/v1/namespaces/$NAMESPACE/secrets/woo-api
