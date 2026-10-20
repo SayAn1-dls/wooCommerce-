@@ -73,9 +73,9 @@ member cookie -> POST /api/servers -> 403
 
 ## Phase 6. Dashboard
 
-- [ ] Vite React app: Login, Accept invite, Servers, Server detail, Members, My keys, Audit, Chat
-- [ ] nginx image, chart, ingress /
-- [ ] headless browser click-through of Part 2 actions
+- [x] Vite React app: Login, Accept invite, Servers, Server detail, Members, My keys, Audit, Chat
+- [x] nginx image, chart, ingress /
+- [x] headless browser click-through of Part 2 actions
 
 ## Phase 7. Chat agent
 
