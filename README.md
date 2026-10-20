@@ -13,6 +13,8 @@ How requests flow:
 - gateway -> woo-mcp -> WordPress REST API
 - gateway -> notes-mcp, and gateway -> DeepWiki over the internet
 
+What is where:
+
 - `apps/woo-mcp` our MCP server for products and orders (WooCommerce REST API)
 - `apps/notes-mcp` a tiny in-memory notes server, the second upstream
 - `apps/gateway` Fastify: dashboard API, the `/mcp` endpoint, the chat agent
