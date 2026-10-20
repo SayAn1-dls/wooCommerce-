@@ -22,16 +22,15 @@ scripts/wp-orders.sh                                                      # orde
 
 ## Phase 2. Woo MCP server
 
-- [ ] apps/woo-mcp: server, woo REST client, 5 tools, /healthz /readyz, bearer check
-- [ ] Dockerfile (multi-stage, non-root), chart templates, NetworkPolicy (ingress from gateway only)
+- [x] apps/woo-mcp: server, woo REST client, 5 tools, /healthz /readyz, bearer check
+- [x] Dockerfile (multi-stage, non-root), chart templates, NetworkPolicy (ingress from gateway only)
 
 Done when:
 ```
 kubectl -n mcpg port-forward svc/woo-mcp 3000:3000 &
-npx @modelcontextprotocol/inspector --cli http://localhost:3000/mcp --transport http \
-  --header "Authorization: Bearer $WOO_MCP_TOKEN" --method tools/list          # 5 tools
-... --method tools/call --tool-name create_product --tool-arg name=Phase2 --tool-arg regular_price=10
-curl -s http://shop.localhost/?post_type=product | grep Phase2
+scripts/mcp.sh http://localhost:3000/mcp "$WOO_MCP_TOKEN" list                       # 5 tools
+scripts/mcp.sh http://localhost:3000/mcp "$WOO_MCP_TOKEN" call create_product name="Phase Two Mug" regular_price=199
+curl -s http://shop.localhost/shop/ | grep "Phase Two Mug"
 ```
 
 ## Phase 3. Gateway core
