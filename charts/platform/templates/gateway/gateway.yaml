@@ -65,6 +65,10 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+          lifecycle:
+            # give Traefik a moment to drop this pod before it stops, so upgrades don't 502
+            preStop:
+              sleep: { seconds: 5 }
           startupProbe:
             httpGet: { path: /healthz, port: 3000 }
             periodSeconds: 3

@@ -60,10 +60,10 @@ kubectl -n mcpg scale deploy/notes-mcp --replicas=0; sleep 35; curl /api/servers
 
 ## Phase 5. Users and keys
 
-- [ ] sessions, login rate limit, /api/auth/*, /api/me
-- [ ] invites create/accept, members list/patch
-- [ ] keys create/list/revoke, admin any
-- [ ] role guard on admin routes
+- [x] sessions, login rate limit, /api/auth/*, /api/me
+- [x] invites create/accept, members list/patch
+- [x] keys create/list/revoke, admin any
+- [x] role guard on admin routes
 
 Done when:
 ```
