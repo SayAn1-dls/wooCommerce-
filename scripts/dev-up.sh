@@ -3,6 +3,7 @@
 # Safe to run again: it reuses the cluster, rebuilds images and upgrades the release.
 #   scripts/dev-up.sh            hosted LLM (put a key in later, see TODO-FOR-ME.md)
 #   OLLAMA=1 scripts/dev-up.sh   chat uses the Ollama running on this laptop
+#   ADMIN_EMAIL=asha@app.localhost scripts/dev-up.sh   seed admin email (first run only)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -33,7 +34,7 @@ k3d image import -c "$CLUSTER" "${images[@]}" >/dev/null
 new_password=""
 if [ ! -f .dev-admin ]; then
   new_password=$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-16)
-  printf 'admin@app.localhost\n%s\n' "$new_password" > .dev-admin
+  printf '%s\n%s\n' "${ADMIN_EMAIL:-admin@app.localhost}" "$new_password" > .dev-admin
   chmod 600 .dev-admin
 fi
 admin_email=$(sed -n 1p .dev-admin)

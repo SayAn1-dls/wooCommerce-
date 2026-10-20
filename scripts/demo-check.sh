@@ -49,6 +49,7 @@ if [ ! -f .dev-member ]; then
   printf '%s\n%s\n' "$member_email" "$member_password" > .dev-member
   chmod 600 .dev-member
 fi
+member_email=$(sed -n 1p .dev-member)
 member_password=$(sed -n 2p .dev-member)
 member_id=$(post "$member_jar" /api/auth/login "{\"email\":\"$member_email\",\"password\":\"$member_password\"}" | json "d.get('id','')")
 if [ -z "$member_id" ]; then
