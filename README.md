@@ -5,17 +5,13 @@ servers once in a dashboard. Everyone on the team then uses all of them through 
 MCP endpoint and their own API key, or through the chat in the dashboard. Only the
 gateway ever holds the upstream credentials.
 
-```
-browser / Claude Code / Cursor
-        |  app.<domain>            shop.<domain>
-     Traefik ------------------------------+
-     |  /        |  /api, /mcp             |
- dashboard     gateway ---- postgres    wordpress ---- mariadb
- (nginx)        |  |  \                    ^
-                |  |   +--> DeepWiki (internet, 443)
-                |  +--> notes-mcp          |
-                +--> woo-mcp --------------+
-```
+How requests flow:
+
+- `shop.<domain>` -> Traefik -> WordPress -> MariaDB
+- `app.<domain>/` -> Traefik -> dashboard (nginx)
+- `app.<domain>/api` and `/mcp` -> Traefik -> gateway -> Postgres
+- gateway -> woo-mcp -> WordPress REST API
+- gateway -> notes-mcp, and gateway -> DeepWiki over the internet
 
 - `apps/woo-mcp` our MCP server for products and orders (WooCommerce REST API)
 - `apps/notes-mcp` a tiny in-memory notes server, the second upstream

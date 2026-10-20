@@ -18,7 +18,7 @@ Have `docs/WALKTHROUGH.md` section 4 open as your cheat sheet.
 
 ## 0:00 System design (1.5 min)
 
-- Show the diagram at the top of `README.md`. Say: four layers, store, our Woo MCP
+- Show the request flows at the top of `README.md`. Say: four layers, store, our Woo MCP
   server, the gateway with dashboard, and the chat agent inside the gateway.
 - "An admin connects servers once, everyone gets one URL and one key, nobody but the
   gateway holds upstream credentials."
