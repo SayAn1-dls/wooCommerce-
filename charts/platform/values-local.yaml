@@ -1,0 +1,15 @@
+# k3d on a laptop. *.localhost resolves to 127.0.0.1 and k3d maps port 80 to Traefik.
+domain: localhost
+ingress:
+  className: traefik
+  tls: false
+storageClass: local-path
+images:
+  prefix: mcpg/
+  tag: dev
+  # images are imported with k3d image import, never pulled
+  pullPolicy: Never
+wordpress:
+  adminEmail: admin@shop.localhost
+gateway:
+  seedAdminEmail: admin@app.localhost

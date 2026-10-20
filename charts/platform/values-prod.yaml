@@ -1,0 +1,22 @@
+# k3s on a VPS with a real domain. Point shop.<domain> and app.<domain> at the VPS IP.
+domain: example.com
+ingress:
+  className: traefik
+  tls: true
+  # cert-manager ClusterIssuer, see README for how to create it
+  clusterIssuer: letsencrypt
+# k3s ships local-path; swap for your provider's class (e.g. hcloud-volumes) if you have one
+storageClass: local-path
+images:
+  prefix: ghcr.io/example/mcpg-
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+wordpress:
+  adminEmail: admin@example.com
+gateway:
+  seedAdminEmail: admin@example.com
+  # pass the password with --set gateway.seedAdminPassword=..., or create the
+  # whole Secret yourself and set existingSecret (see README "VPS setup")
+  existingSecret: ""
+  llm:
+    existingSecret: llm

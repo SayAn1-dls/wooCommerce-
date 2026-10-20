@@ -1,0 +1,75 @@
+# Shared defaults. values-local.yaml and values-prod.yaml only override what differs.
+domain: example.com
+storeTimezone: Asia/Kolkata
+storeCurrency: INR
+
+ingress:
+  className: traefik
+  tls: false
+  clusterIssuer: letsencrypt
+
+# empty means the cluster default storage class
+storageClass: ""
+
+images:
+  # our own images are <prefix><name>:<tag>, e.g. mcpg/gateway:dev
+  prefix: mcpg/
+  tag: dev
+  pullPolicy: IfNotPresent
+  wordpress: wordpress:7.1.3-php8.3-apache
+  wpcli: wordpress:cli-2.12.0-php8.3
+  mariadb: mariadb:11.4
+  postgres: postgres:17-alpine
+
+mariadb:
+  storage: 2Gi
+  existingSecret: ""
+
+wordpress:
+  storage: 2Gi
+  adminUser: admin
+  adminEmail: admin@example.com
+  # pinned so a re-run of store-setup changes nothing; empty means latest
+  woocommerceVersion: "11.2.1"
+  existingSecret: ""
+
+postgres:
+  storage: 1Gi
+  existingSecret: ""
+
+wooMcp:
+  replicas: 1
+  # WordPress builds links from its public URL, so we call the in-cluster
+  # service but say we are the public host
+  sendPublicHost: true
+
+notesMcp:
+  replicas: 1
+
+gateway:
+  replicas: 1
+  existingSecret: ""
+  seedAdminEmail: admin@example.com
+  # set with --set gateway.seedAdminPassword=... or use existingSecret
+  seedAdminPassword: ""
+  allowedInternalHosts:
+    - woo-mcp
+    - notes-mcp
+  remoteServer:
+    slug: deepwiki
+    name: DeepWiki
+    url: https://mcp.deepwiki.com/mcp
+  llm:
+    baseUrl: https://generativelanguage.googleapis.com/v1beta/openai
+    model: gemini-2.5-flash
+    # Secret with key LLM_API_KEY. The gateway starts fine without it.
+    existingSecret: llm
+
+dashboard:
+  replicas: 1
+
+networkPolicy:
+  enabled: true
+  ingressNamespace: kube-system
+  ingressPodLabels:
+    app.kubernetes.io/name: traefik

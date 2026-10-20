@@ -1,0 +1,68 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mariadb
+spec:
+  podSelector:
+    matchLabels: {{- include "mcpg.selector" "mariadb" | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["wordpress", "store-setup"]
+      ports:
+        - { protocol: TCP, port: 3306 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: wordpress
+spec:
+  podSelector:
+    matchLabels: {{- include "mcpg.selector" "wordpress" | nindent 6 }}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["woo-mcp", "store-setup"]
+      ports:
+        - { protocol: TCP, port: 80 }
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {{- include "mcpg.selector" "mariadb" | nindent 14 }}
+      ports:
+        - { protocol: TCP, port: 3306 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: store-setup
+spec:
+  podSelector:
+    matchLabels: {{- include "mcpg.selector" "store-setup" | nindent 6 }}
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {{- include "mcpg.selector" "mariadb" | nindent 14 }}
+      ports:
+        - { protocol: TCP, port: 3306 }
+    - to:
+        - podSelector:
+            matchLabels: {{- include "mcpg.selector" "wordpress" | nindent 14 }}
+      ports:
+        - { protocol: TCP, port: 80 }
+    # wordpress.org for the WooCommerce download, and the Kubernetes API
+    # (443 on the service IP, 6443 on the node after DNAT) for the woo-api Secret
+    - ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 6443 }
+{{- end }}
