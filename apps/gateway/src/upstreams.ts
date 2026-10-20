@@ -62,7 +62,7 @@ function closeClient(u: Upstream) {
   if (client) client.close().catch(() => {})
 }
 
-async function connect(u: Upstream) {
+async function connect(u: Upstream, timeout = CONNECT_TIMEOUT) {
   closeClient(u)
   // DNS can change after the admin saved the URL, so check again on every connect
   await checkUrl(u.row.url, config.allowedInternalHosts)
@@ -76,8 +76,8 @@ async function connect(u: Upstream) {
     }
   })
   try {
-    await client.connect(transport, { timeout: CONNECT_TIMEOUT })
-    u.tools = await listAllTools(client, CONNECT_TIMEOUT)
+    await client.connect(transport, { timeout })
+    u.tools = await listAllTools(client, timeout)
   } catch (err) {
     client.close().catch(() => {})
     throw err
@@ -105,9 +105,11 @@ export async function check(u: Upstream) {
     if (u.client && u.status === 'connected') {
       try {
         await ping(u.client)
-      } catch {
-        // the server may just have dropped our session; a fresh connect tells us if it is really down
-        await connect(u)
+      } catch (err) {
+        // a timeout counts as a failure straight away; any other error may just be the
+        // server dropping our session, and a quick fresh connect tells us which it is
+        if (err instanceof McpError && err.code === ErrorCode.RequestTimeout) throw err
+        await connect(u, PING_TIMEOUT)
       }
     } else {
       await connect(u)
@@ -118,7 +120,9 @@ export async function check(u: Upstream) {
     u.lastError = null
   } catch (err) {
     u.failures++
-    u.lastError = (err as Error).message || String(err)
+    const cause = (err as { cause?: Error }).cause
+    u.lastError = [(err as Error).message || String(err), cause?.message].filter(Boolean).join(': ')
+    console.log(`${u.row.slug}: check failed (${u.failures} in a row): ${u.lastError}`)
     // a server that was never up is unreachable straight away; a live one gets a second chance
     if (u.failures >= 2 || u.status !== 'connected') {
       if (u.status !== 'unreachable') console.log(`${u.row.slug}: unreachable: ${u.lastError}`)

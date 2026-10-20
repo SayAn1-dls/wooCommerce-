@@ -49,12 +49,12 @@ kubectl -n mcpg exec postgres-0 -- psql -U mcpg -c "select tool_name,outcome fro
 
 ## Phase 4. notes-mcp + remote
 
-- [ ] apps/notes-mcp (~80 lines), image, chart, policy
-- [ ] deepwiki seeded, egress 443 allowed
+- [x] apps/notes-mcp (~80 lines), image, chart, policy
+- [x] deepwiki seeded, egress 443 allowed
 
 Done when:
 ```
-inspector ... --method tools/list | grep -E 'woo__|notes__|deepwiki__'
+scripts/mcp.sh http://app.localhost/mcp "$KEY" list | grep -E 'woo__|notes__|deepwiki__'
 kubectl -n mcpg scale deploy/notes-mcp --replicas=0; sleep 35; curl /api/servers  # notes unreachable, woo__list_orders still ok
 ```
 
