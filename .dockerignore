@@ -1,0 +1,7 @@
+**/node_modules
+**/dist
+.git
+charts
+docs
+scripts
+*.md
