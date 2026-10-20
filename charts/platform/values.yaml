@@ -64,6 +64,9 @@ gateway:
     model: gemini-2.5-flash
     # Secret with key LLM_API_KEY. The gateway starts fine without it.
     existingSecret: llm
+    # The gateway may only reach public IPs on 443. For an LLM on a private
+    # address (a local Ollama) add it here, e.g. [{cidr: 192.168.65.254/32, port: 11434}]
+    extraEgress: []
 
 dashboard:
   replicas: 1

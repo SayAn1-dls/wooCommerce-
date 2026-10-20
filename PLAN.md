@@ -79,8 +79,11 @@ member cookie -> POST /api/servers -> 403
 
 ## Phase 7. Chat agent
 
-- [ ] /api/chat loop over OpenAI-compatible API, shared tool path, 8 call cap, 50 KB cap
-- [ ] missing key -> clean error + TODO entry
+- [x] /api/chat loop over OpenAI-compatible API, shared tool path, 8 call cap, 50 KB cap
+- [x] missing key -> clean error + TODO entry
+
+Checked with local Ollama (qwen2.5:3b): "Test Mug" at 299 created (id 18, on storefront),
+"what orders came in today?" answered with order 17 only. Without a key: 503 with a clear message.
 
 ## Phase 8. Docs + prod
 

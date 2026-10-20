@@ -29,6 +29,13 @@ spec:
             except: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16", "100.64.0.0/10"]
       ports:
         - { protocol: TCP, port: 443 }
+    {{- range .Values.gateway.llm.extraEgress }}
+    - to:
+        - ipBlock:
+            cidr: {{ .cidr }}
+      ports:
+        - { protocol: TCP, port: {{ .port }} }
+    {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

@@ -1,0 +1,11 @@
+# Optional extra on top of values-local.yaml: use an Ollama running on the laptop
+# as the chat LLM. Docker Desktop exposes the host as host.k3d.internal (192.168.65.254).
+# Ollama ignores the key, but the gateway wants one, so create the llm Secret with any value:
+#   kubectl -n mcpg create secret generic llm --from-literal=LLM_API_KEY=ollama
+gateway:
+  llm:
+    baseUrl: http://host.k3d.internal:11434/v1
+    model: qwen2.5:3b
+    extraEgress:
+      - cidr: 192.168.65.254/32
+        port: 11434
