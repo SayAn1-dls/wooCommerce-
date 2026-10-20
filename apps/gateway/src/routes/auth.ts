@@ -34,7 +34,7 @@ export function authRoutes(app: FastifyInstance) {
     return { ok: true }
   })
 
-  app.get('/api/me', { preHandler: requireUser }, async (req) => publicUser(req.user!))
+  app.get('/api/me', { onRequest: requireUser }, async (req) => publicUser(req.user!))
 
   app.post(
     '/api/invites/accept',

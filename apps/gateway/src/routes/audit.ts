@@ -8,7 +8,7 @@ const PAGE_SIZE = 50
 const outcomes = ['ok', 'tool_error', 'upstream_error', 'timeout', 'denied'] as const
 
 export function auditRoutes(app: FastifyInstance) {
-  app.get('/api/audit', { preHandler: requireUser }, async (req) => {
+  app.get('/api/audit', { onRequest: requireUser }, async (req) => {
     const me = req.user!
     const q = req.query as { user?: string; server?: string; outcome?: string; page?: string }
     const page = Math.max(1, Number(q.page) || 1)

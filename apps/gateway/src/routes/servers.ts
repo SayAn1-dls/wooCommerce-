@@ -49,12 +49,12 @@ type Body = {
 }
 
 export function serverRoutes(app: FastifyInstance) {
-  app.get('/api/servers', { preHandler: requireUser }, async () => {
+  app.get('/api/servers', { onRequest: requireUser }, async () => {
     const rows = await db.select().from(servers).orderBy(servers.id)
     return rows.map(view)
   })
 
-  app.get('/api/servers/:id/tools', { preHandler: requireUser }, async (req, reply) => {
+  app.get('/api/servers/:id/tools', { onRequest: requireUser }, async (req, reply) => {
     const id = Number((req.params as { id: string }).id)
     const [row] = await db.select().from(servers).where(eq(servers.id, id))
     if (!row) return reply.code(404).send({ error: 'no such server' })
@@ -73,7 +73,7 @@ export function serverRoutes(app: FastifyInstance) {
   app.post(
     '/api/servers',
     {
-      preHandler: requireAdmin,
+      onRequest: requireAdmin,
       schema: {
         body: {
           type: 'object',
@@ -115,7 +115,7 @@ export function serverRoutes(app: FastifyInstance) {
   app.patch(
     '/api/servers/:id',
     {
-      preHandler: requireAdmin,
+      onRequest: requireAdmin,
       schema: {
         body: {
           type: 'object',
@@ -156,7 +156,7 @@ export function serverRoutes(app: FastifyInstance) {
     },
   )
 
-  app.delete('/api/servers/:id', { preHandler: requireAdmin }, async (req, reply) => {
+  app.delete('/api/servers/:id', { onRequest: requireAdmin }, async (req, reply) => {
     const id = Number((req.params as { id: string }).id)
     const [row] = await db.delete(servers).where(eq(servers.id, id)).returning()
     if (!row) return reply.code(404).send({ error: 'no such server' })

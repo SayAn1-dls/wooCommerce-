@@ -7,7 +7,7 @@ import { requireUser } from '../session.js'
 
 export function keyRoutes(app: FastifyInstance) {
   // members see their own keys, admins see everyone's
-  app.get('/api/keys', { preHandler: requireUser }, async (req) => {
+  app.get('/api/keys', { onRequest: requireUser }, async (req) => {
     const me = req.user!
     const rows = await db
       .select({ key: apiKeys, email: users.email })
@@ -21,7 +21,7 @@ export function keyRoutes(app: FastifyInstance) {
   app.post(
     '/api/keys',
     {
-      preHandler: requireUser,
+      onRequest: requireUser,
       schema: {
         body: {
           type: 'object',
@@ -41,7 +41,7 @@ export function keyRoutes(app: FastifyInstance) {
     },
   )
 
-  app.delete('/api/keys/:id', { preHandler: requireUser }, async (req, reply) => {
+  app.delete('/api/keys/:id', { onRequest: requireUser }, async (req, reply) => {
     const me = req.user!
     const id = Number((req.params as { id: string }).id)
     const [row] = await db.select().from(apiKeys).where(eq(apiKeys.id, id))

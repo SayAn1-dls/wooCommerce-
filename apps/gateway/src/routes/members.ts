@@ -8,7 +8,7 @@ import { publicUser, requireAdmin } from '../session.js'
 const INVITE_HOURS = 72
 
 export function memberRoutes(app: FastifyInstance) {
-  app.get('/api/members', { preHandler: requireAdmin }, async () => {
+  app.get('/api/members', { onRequest: requireAdmin }, async () => {
     const rows = await db.select().from(users).orderBy(users.id)
     return rows.map(publicUser)
   })
@@ -16,7 +16,7 @@ export function memberRoutes(app: FastifyInstance) {
   app.post(
     '/api/invites',
     {
-      preHandler: requireAdmin,
+      onRequest: requireAdmin,
       schema: {
         body: {
           type: 'object',
@@ -49,7 +49,7 @@ export function memberRoutes(app: FastifyInstance) {
   app.patch(
     '/api/members/:id',
     {
-      preHandler: requireAdmin,
+      onRequest: requireAdmin,
       schema: {
         body: {
           type: 'object',
