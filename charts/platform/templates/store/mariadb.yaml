@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  labels: {{- include "mcpg.labels" (dict "name" "mariadb") | nindent 4 }}
+spec:
+  clusterIP: None
+  selector: {{- include "mcpg.selector" "mariadb" | nindent 4 }}
+  ports:
+    - name: mysql
+      port: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  labels: {{- include "mcpg.labels" (dict "name" "mariadb") | nindent 4 }}
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels: {{- include "mcpg.selector" "mariadb" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "mcpg.labels" (dict "name" "mariadb") | nindent 8 }}
+    spec:
+      containers:
+        - name: mariadb
+          image: {{ .Values.images.mariadb }}
+          env:
+            - name: MARIADB_DATABASE
+              value: wordpress
+            - name: MARIADB_USER
+              value: wordpress
+            - name: MARIADB_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.mariadbSecret" . }}, key: password } }
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.mariadbSecret" . }}, key: root-password } }
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+          {{- $ping := list "sh" "-c" "mariadb-admin ping -h 127.0.0.1 -uroot -p\"$MARIADB_ROOT_PASSWORD\"" }}
+          startupProbe:
+            exec: { command: {{ toJson $ping }} }
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            exec: { command: {{ toJson $ping }} }
+            periodSeconds: 10
+          livenessProbe:
+            exec: { command: {{ toJson $ping }} }
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- include "mcpg.storageClass" . | nindent 8 }}
+        resources:
+          requests:
+            storage: {{ .Values.mariadb.storage }}

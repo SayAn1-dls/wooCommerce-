@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: store-setup
+---
+# least privilege: read and patch exactly one Secret, nothing else
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: store-setup
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["woo-api"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: store-setup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: store-setup
+subjects:
+  - kind: ServiceAccount
+    name: store-setup
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: store-setup
+data:
+  setup.sh: |
+{{ .Files.Get "files/store-setup.sh" | indent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: store-setup
+  labels: {{- include "mcpg.labels" (dict "name" "store-setup") | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "0"
+    # keep the last run around so its logs can be read
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels: {{- include "mcpg.labels" (dict "name" "store-setup") | nindent 8 }}
+      annotations:
+        checksum/script: {{ .Files.Get "files/store-setup.sh" | sha256sum }}
+    spec:
+      serviceAccountName: store-setup
+      restartPolicy: Never
+      securityContext:
+        # same uid as apache in the wordpress image so files in wp-content stay writable
+        runAsUser: 33
+        runAsGroup: 33
+        fsGroup: 33
+      initContainers:
+        # wp-cli needs the WordPress core files; copy them from the same image the site runs
+        - name: copy-core
+          image: {{ .Values.images.wordpress }}
+          command: ["sh", "-c", "cp -rn /usr/src/wordpress/. /work/ && cp /usr/src/wordpress/wp-config-docker.php /work/wp-config.php"]
+          volumeMounts:
+            - name: core
+              mountPath: /work
+            - name: wp-content
+              mountPath: /work/wp-content
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 300m, memory: 128Mi }
+      containers:
+        - name: setup
+          image: {{ .Values.images.wpcli }}
+          command: ["bash", "/scripts/setup.sh"]
+          env:
+            {{- include "mcpg.wordpressEnv" . | nindent 12 }}
+            - name: HOME
+              value: /tmp
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: SHOP_URL
+              value: {{ include "mcpg.shopUrl" . }}
+            - name: STORE_TIMEZONE
+              value: {{ .Values.storeTimezone }}
+            - name: STORE_CURRENCY
+              value: {{ .Values.storeCurrency }}
+            - name: WOO_VERSION
+              value: {{ .Values.wordpress.woocommerceVersion | quote }}
+            - name: WP_ADMIN_USER
+              value: {{ .Values.wordpress.adminUser }}
+            - name: WP_ADMIN_EMAIL
+              value: {{ .Values.wordpress.adminEmail }}
+            - name: WP_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.wordpressSecret" . }}, key: admin-password } }
+          volumeMounts:
+            - name: core
+              mountPath: /var/www/html
+            - name: wp-content
+              mountPath: /var/www/html/wp-content
+            - name: scripts
+              mountPath: /scripts
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 300m, memory: 256Mi }
+      volumes:
+        - name: core
+          emptyDir: {}
+        - name: wp-content
+          persistentVolumeClaim:
+            claimName: wp-content
+        - name: scripts
+          configMap:
+            name: store-setup
