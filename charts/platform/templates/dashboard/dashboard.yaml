@@ -41,6 +41,10 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+          lifecycle:
+            # let Traefik drop this pod before nginx stops, so a rollout has no 502s
+            preStop:
+              sleep: { seconds: 5 }
           livenessProbe:
             httpGet: { path: /, port: 8080 }
             periodSeconds: 20
