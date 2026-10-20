@@ -169,6 +169,14 @@ Both MCP servers handle SIGTERM themselves. Node is PID 1 in the container and P
 gets no default signal handler, so without it a pod being scaled down kept answering
 health checks over the gateway's keep-alive connection for the whole 30s grace period.
 
+## Dashboard look
+
+The first version followed the brief's strict style (black on white, no colour,
+status as a word). On request it was redesigned: dark sidebar with icons, cards,
+coloured status pills, chat bubbles, a split-screen login. Still plain CSS
+(`apps/dashboard/src/style.css`) and inline SVG icons, no UI kit. Inter is loaded
+from Google Fonts with the system font as fallback.
+
 ## Choices the brief left open
 
 - Chat history is not stored; the dashboard sends the conversation each time.
