@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from './db/index.js'
 import { apiKeys, users } from './db/schema.js'
 import { randomToken, sameHex, sha256 } from './crypto.js'
@@ -49,6 +49,6 @@ export async function checkKey(key: string): Promise<Check> {
   if (!match) return { ok: false, reason: 'unknown key', userId: null, keyId: null }
   if (match.key.revokedAt) return { ok: false, reason: 'key revoked', userId: match.user.id, keyId: match.key.id }
   if (match.user.disabledAt) return { ok: false, reason: 'user disabled', userId: match.user.id, keyId: match.key.id }
-  await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(and(eq(apiKeys.id, match.key.id)))
+  await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, match.key.id))
   return { ok: true, user: match.user, keyId: match.key.id }
 }

@@ -16,7 +16,7 @@ export function auditRoutes(app: FastifyInstance) {
     const where: SQL[] = []
     // members only ever see their own rows, whatever they put in the query
     if (me.role !== 'admin') where.push(eq(auditLog.userId, me.id))
-    else if (q.user) where.push(eq(auditLog.userId, Number(q.user)))
+    else if (q.user && Number.isInteger(Number(q.user))) where.push(eq(auditLog.userId, Number(q.user)))
     if (q.server) where.push(eq(auditLog.serverSlug, q.server))
     if (q.outcome && (outcomes as readonly string[]).includes(q.outcome)) {
       where.push(eq(auditLog.outcome, q.outcome as (typeof outcomes)[number]))
