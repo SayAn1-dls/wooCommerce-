@@ -38,6 +38,7 @@ spec:
     metadata:
       labels: {{- include "mcpg.labels" (dict "name" "wordpress") | nindent 8 }}
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: wordpress
           image: {{ .Values.images.wordpress }}

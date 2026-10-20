@@ -24,6 +24,7 @@ spec:
     metadata:
       labels: {{- include "mcpg.labels" (dict "name" "mariadb") | nindent 8 }}
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: mariadb
           image: {{ .Values.images.mariadb }}
