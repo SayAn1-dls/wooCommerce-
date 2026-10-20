@@ -1,0 +1,81 @@
+{{- if not .Values.postgres.existingSecret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-auth
+  annotations:
+    helm.sh/resource-policy: keep
+type: Opaque
+data:
+  password: {{ include "mcpg.secretValue" (dict "root" $ "secret" "postgres-auth" "key" "password") | b64enc }}
+---
+{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels: {{- include "mcpg.labels" (dict "name" "postgres") | nindent 4 }}
+spec:
+  clusterIP: None
+  selector: {{- include "mcpg.selector" "postgres" | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels: {{- include "mcpg.labels" (dict "name" "postgres") | nindent 4 }}
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels: {{- include "mcpg.selector" "postgres" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "mcpg.labels" (dict "name" "postgres") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: postgres
+          image: {{ .Values.images.postgres }}
+          env:
+            - name: POSTGRES_USER
+              value: mcpg
+            - name: POSTGRES_DB
+              value: mcpg
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.postgresSecret" . }}, key: password } }
+            # a subdirectory, because the volume root has lost+found on some storage classes
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          {{- $ready := list "pg_isready" "-U" "mcpg" "-d" "mcpg" "-h" "127.0.0.1" }}
+          startupProbe:
+            exec: { command: {{ toJson $ready }} }
+            periodSeconds: 3
+            failureThreshold: 40
+          readinessProbe:
+            exec: { command: {{ toJson $ready }} }
+            periodSeconds: 10
+          livenessProbe:
+            exec: { command: {{ toJson $ready }} }
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 300m, memory: 256Mi }
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- include "mcpg.storageClass" . | nindent 8 }}
+        resources:
+          requests:
+            storage: {{ .Values.postgres.storage }}

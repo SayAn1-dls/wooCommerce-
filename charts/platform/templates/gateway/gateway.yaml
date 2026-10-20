@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  labels: {{- include "mcpg.labels" (dict "name" "gateway") | nindent 4 }}
+spec:
+  selector: {{- include "mcpg.selector" "gateway" | nindent 4 }}
+  ports:
+    - name: http
+      port: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels: {{- include "mcpg.labels" (dict "name" "gateway") | nindent 4 }}
+spec:
+  replicas: {{ .Values.gateway.replicas }}
+  selector:
+    matchLabels: {{- include "mcpg.selector" "gateway" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "mcpg.labels" (dict "name" "gateway") | nindent 8 }}
+    spec:
+      # the gateway never talks to the Kubernetes API
+      automountServiceAccountToken: false
+      securityContext: {{- include "mcpg.nodeSecurity" . | nindent 8 }}
+      containers:
+        - name: gateway
+          image: {{ include "mcpg.image" (dict "root" . "name" "gateway") }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          securityContext: {{- include "mcpg.containerSecurity" . | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ include "mcpg.gatewaySecret" . }}
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGUSER
+              value: mcpg
+            - name: PGDATABASE
+              value: mcpg
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.postgresSecret" . }}, key: password } }
+            - name: LLM_BASE_URL
+              value: {{ .Values.gateway.llm.baseUrl | quote }}
+            - name: LLM_MODEL
+              value: {{ .Values.gateway.llm.model | quote }}
+            - name: LLM_API_KEY
+              valueFrom:
+                # optional: the gateway runs without it and the chat says so
+                secretKeyRef: { name: {{ .Values.gateway.llm.existingSecret }}, key: LLM_API_KEY, optional: true }
+            - name: ALLOWED_INTERNAL_HOSTS
+              value: {{ join "," .Values.gateway.allowedInternalHosts | quote }}
+            - name: REMOTE_SERVER_SLUG
+              value: {{ .Values.gateway.remoteServer.slug }}
+            - name: REMOTE_SERVER_NAME
+              value: {{ .Values.gateway.remoteServer.name | quote }}
+            - name: REMOTE_SERVER_URL
+              value: {{ .Values.gateway.remoteServer.url }}
+            - name: STORE_TIMEZONE
+              value: {{ .Values.storeTimezone }}
+            - name: SECURE_COOKIES
+              value: {{ .Values.ingress.tls | quote }}
+          ports:
+            - containerPort: 3000
+              name: http
+          startupProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            periodSeconds: 3
+            failureThreshold: 40
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3000 }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway
+  {{- include "mcpg.ingressAnnotations" . | nindent 2 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- include "mcpg.ingressTls" (dict "root" . "host" (include "mcpg.appHost" .) "secret" "app-tls") | nindent 2 }}
+  rules:
+    - host: {{ include "mcpg.appHost" . }}
+      http:
+        paths:
+          {{- range list "/api" "/mcp" }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway
+                port: { number: 3000 }
+          {{- end }}

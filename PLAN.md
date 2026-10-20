@@ -35,15 +35,15 @@ curl -s http://shop.localhost/shop/ | grep "Phase Two Mug"
 
 ## Phase 3. Gateway core
 
-- [ ] postgres StatefulSet + secret
-- [ ] apps/gateway: config, db schema + drizzle migrations, crypto, seed
-- [ ] upstream manager (connect, cache, health loop, list_changed)
-- [ ] /mcp stateless endpoint: key auth, prefixed tools/list, tools/call routing, 20s timeout, audit
-- [ ] chart templates + ingress app.localhost /api /mcp
+- [x] postgres StatefulSet + secret
+- [x] apps/gateway: config, db schema + drizzle migrations, crypto, seed
+- [x] upstream manager (connect, cache, health loop, list_changed)
+- [x] /mcp stateless endpoint: key auth, prefixed tools/list, tools/call routing, 20s timeout, audit
+- [x] chart templates + ingress app.localhost /api /mcp
 
 Done when:
 ```
-inspector --cli http://app.localhost/mcp --header "Authorization: Bearer $KEY" --method tools/call --tool-name woo__list_orders
+scripts/mcp.sh http://app.localhost/mcp "$KEY" call woo__list_orders
 kubectl -n mcpg exec postgres-0 -- psql -U mcpg -c "select tool_name,outcome from audit_log"
 ```
 
