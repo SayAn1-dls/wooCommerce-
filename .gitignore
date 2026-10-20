@@ -4,3 +4,4 @@ dist
 *.log
 .dev-admin
 .dev-member
+scripts/demo-video/out

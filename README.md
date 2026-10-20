@@ -5,6 +5,38 @@ servers once in a dashboard. Everyone on the team then uses all of them through 
 MCP endpoint and their own API key, or through the chat in the dashboard. Only the
 gateway ever holds the upstream credentials.
 
+## Demo video
+
+[![Demo video: the full acceptance checklist with Asha (admin) and Ravi (member)](docs/media/demo-poster.jpg)](docs/media/demo.mp4)
+
+**[Watch the demo (9.5 min, MP4)](docs/media/demo.mp4)**. GitHub plays it in the browser; use "Download raw file" for a local copy.
+
+It is recorded against the real local cluster from `scripts/dev-up.sh`: every click, tool call and
+command output in it is live. The narration is a synthetic voice. The two `helm` commands in the last
+chapter ran just before that scene and their real output is shown, so the video doesn't sit on a
+one-minute rollout. `scripts/demo-video/` re-records it.
+
+| Time | Chapter |
+| --- | --- |
+| 0:00 | Intro |
+| 0:38 | 1. Architecture |
+| 1:13 | 2. Checklist: buy with Cash on delivery, order in WooCommerce admin |
+| 1:46 | 2. Checklist: Asha (admin) sees 3 servers and their tools |
+| 2:10 | 2. Checklist: chat creates "Test Mug", ordered by hand, "what orders came in today?" |
+| 3:07 | 2. Checklist: Asha invites Ravi, Ravi joins and creates a key |
+| 3:34 | 2. Checklist: Ravi's MCP client, one URL + one key, a two-server flow |
+| 3:58 | 2. Checklist: revoked key gets 401 |
+| 4:17 | 2. Checklist: disabling notes removes its tools |
+| 4:39 | 2. Checklist: notes-mcp killed, woo and DeepWiki keep working |
+| 5:20 | 2. Checklist: every call in the audit log |
+| 5:35 | 3. Kubernetes tour and the blocked curl to woo-mcp |
+| 6:10 | 4. MCP internals: one call through the code |
+| 7:07 | 4. MCP internals: a name collision |
+| 7:23 | 4. MCP internals: a timeout |
+| 7:46 | 5. Security: stored keys and secrets, member 403, SSRF |
+| 8:27 | 6. The chat agent tool loop |
+| 8:57 | 7. Local to VPS, helm upgrade and rollback |
+
 How requests flow:
 
 - `shop.<domain>` -> Traefik -> WordPress -> MariaDB
