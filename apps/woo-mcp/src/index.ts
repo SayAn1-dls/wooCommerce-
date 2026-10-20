@@ -65,3 +65,7 @@ http
     }
   })
   .listen(port, () => console.log(`woo-mcp listening on ${port}`))
+
+// we run as PID 1 in the container, which gets no default SIGTERM handler;
+// without this the pod keeps answering for the whole grace period
+process.on('SIGTERM', () => process.exit(0))
