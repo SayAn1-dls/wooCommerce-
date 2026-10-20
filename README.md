@@ -7,9 +7,9 @@ gateway ever holds the upstream credentials.
 
 ## Demo video
 
-[![Demo video: the full acceptance checklist with Asha (admin) and Ravi (member)](docs/media/demo-poster.jpg)](docs/media/demo.mp4)
+[![Demo video: the full acceptance checklist with Asha (admin) and Ravi (member)](docs/media/demo-poster.jpg)](https://cdn.jsdelivr.net/gh/SayAn1-dls/wooCommerce-@f6c79251ecbc5e901d27950e6f86de4e141f04b3/docs/media/demo.mp4)
 
-**[Watch the demo (9.5 min, MP4)](docs/media/demo.mp4)**. GitHub plays it in the browser; use "Download raw file" for a local copy.
+**[Watch the demo (9.5 min)](https://cdn.jsdelivr.net/gh/SayAn1-dls/wooCommerce-@f6c79251ecbc5e901d27950e6f86de4e141f04b3/docs/media/demo.mp4)**: plays in the browser. The file itself is [docs/media/demo.mp4](docs/media/demo.mp4) (GitHub only offers it as a download).
 
 It is recorded against the real local cluster from `scripts/dev-up.sh`: every click, tool call and
 command output in it is live. The narration is a synthetic voice. The two `helm` commands in the last
