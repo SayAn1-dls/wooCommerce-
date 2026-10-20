@@ -1,0 +1,8 @@
+{
+  "name": "mcp-gateway",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
