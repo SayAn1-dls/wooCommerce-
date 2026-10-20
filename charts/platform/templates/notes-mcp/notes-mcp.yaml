@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notes-mcp
+  labels: {{- include "mcpg.labels" (dict "name" "notes-mcp") | nindent 4 }}
+spec:
+  selector: {{- include "mcpg.selector" "notes-mcp" | nindent 4 }}
+  ports:
+    - name: http
+      port: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-mcp
+  labels: {{- include "mcpg.labels" (dict "name" "notes-mcp") | nindent 4 }}
+spec:
+  replicas: {{ .Values.notesMcp.replicas }}
+  selector:
+    matchLabels: {{- include "mcpg.selector" "notes-mcp" | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "mcpg.labels" (dict "name" "notes-mcp") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {{- include "mcpg.nodeSecurity" . | nindent 8 }}
+      containers:
+        - name: notes-mcp
+          image: {{ include "mcpg.image" (dict "root" . "name" "notes-mcp") }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          securityContext: {{- include "mcpg.containerSecurity" . | nindent 12 }}
+          env:
+            - name: NOTES_MCP_TOKEN
+              valueFrom: { secretKeyRef: { name: {{ include "mcpg.gatewaySecret" . }}, key: NOTES_MCP_TOKEN } }
+          ports:
+            - containerPort: 3000
+              name: http
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            periodSeconds: 20
+          readinessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 100m, memory: 128Mi }
