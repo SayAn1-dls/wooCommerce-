@@ -5,10 +5,11 @@ import { config } from './config.js'
 import { encrypt, hashPassword } from './crypto.js'
 
 export async function seed() {
+  // only on first boot: once any admin exists, a changed SEED_ADMIN_EMAIL must not add another one
   if (config.seedAdminEmail && config.seedAdminPassword) {
     const email = config.seedAdminEmail.toLowerCase()
-    const existing = await db.select().from(users).where(eq(users.email, email))
-    if (existing.length === 0) {
+    const admins = await db.select().from(users).where(eq(users.role, 'admin'))
+    if (admins.length === 0) {
       await db.insert(users).values({
         email,
         name: 'Admin',
