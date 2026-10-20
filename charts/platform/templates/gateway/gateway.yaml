@@ -87,7 +87,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gateway
-  {{- include "mcpg.ingressAnnotations" . | nindent 2 }}
+  # no cert-manager annotation here: the dashboard Ingress requests app-tls for
+  # this host and we only reuse the secret, so two Ingresses don't fight over one Certificate
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   {{- include "mcpg.ingressTls" (dict "root" . "host" (include "mcpg.appHost" .) "secret" "app-tls") | nindent 2 }}
