@@ -87,6 +87,10 @@ Checked with local Ollama (qwen2.5:3b): "Test Mug" at 299 created (id 18, on sto
 
 ## Phase 8. Docs + prod
 
-- [ ] README, docs/*, demo-script.md, TODO-FOR-ME.md
-- [ ] values-prod.yaml renders: `helm template platform charts/platform -f charts/platform/values-prod.yaml`
-- [ ] scripts/demo-check.sh passes on local
+- [x] README, docs/*, demo-script.md, TODO-FOR-ME.md
+- [x] values-prod.yaml renders: `helm template platform charts/platform -f charts/platform/values-prod.yaml`
+- [x] scripts/demo-check.sh passes on local
+
+Checked: `scripts/demo-check.sh` passes from a fresh cluster (twice), `helm template`
+with values-prod renders and lints, upgrade to a new tag and rollback keep users, keys,
+audit rows, the store and the WooCommerce key.
