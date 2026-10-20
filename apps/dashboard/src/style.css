@@ -1,0 +1,161 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a {
+  color: #111;
+}
+
+header {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 24px;
+  border-bottom: 1px solid #ddd;
+}
+
+header .who {
+  margin-left: auto;
+  color: #666;
+}
+
+main {
+  max-width: 1100px;
+  padding: 16px 24px 48px;
+}
+
+h1 {
+  font-size: 20px;
+  margin: 8px 0 16px;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 24px 0 8px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+}
+
+button {
+  font: inherit;
+  color: #111;
+  background: #fff;
+  border: 1px solid #111;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #111;
+  color: #fff;
+}
+
+button:disabled {
+  color: #666;
+  border-color: #ddd;
+  cursor: default;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: #111;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 4px 6px;
+}
+
+form.box {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin: 12px 0;
+  display: grid;
+  gap: 8px;
+  max-width: 560px;
+}
+
+form.box label {
+  display: grid;
+  gap: 2px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: #666;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.error {
+  border: 1px solid #111;
+  padding: 6px 8px;
+  margin: 8px 0;
+}
+
+code,
+pre {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+pre {
+  border: 1px solid #ddd;
+  padding: 8px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.narrow {
+  max-width: 360px;
+  margin: 64px auto;
+}
+
+.chat {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.msg {
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  white-space: pre-wrap;
+}
+
+.msg .who {
+  font-weight: 600;
+}
