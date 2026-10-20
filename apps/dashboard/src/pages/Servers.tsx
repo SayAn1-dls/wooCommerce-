@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, type Me } from '../api'
 import { Link } from '../router'
+import { Icon } from '../icons'
 import { ServerForm } from './ServerForm'
 
 export type Server = {
@@ -17,7 +18,11 @@ export type Server = {
   toolCount: number
 }
 
-const words = { connected: 'Connected', unreachable: 'Unreachable', disabled: 'Disabled' }
+export function StatusPill({ status }: { status: Server['status'] }) {
+  const look = { connected: 'green', unreachable: 'red', disabled: 'gray' }[status]
+  const word = { connected: 'Connected', unreachable: 'Unreachable', disabled: 'Disabled' }[status]
+  return <span className={`pill ${look}`}>{word}</span>
+}
 
 export function Servers({ me }: { me: Me }) {
   const [servers, setServers] = useState<Server[] | null>(null)
@@ -50,10 +55,56 @@ export function Servers({ me }: { me: Me }) {
     }
   }
 
+  const list = servers ?? []
+  const connected = list.filter((s) => s.status === 'connected')
+  const tools = connected.reduce((n, s) => n + s.toolCount, 0)
+
   return (
     <>
-      <h1>Servers</h1>
-      {isAdmin && !editing && <button onClick={() => setEditing('new')}>Add server</button>}
+      <div className="page-head">
+        <div>
+          <h1>Servers</h1>
+          <p>MCP servers the whole team can use through {location.origin}/mcp</p>
+        </div>
+        {isAdmin && !editing && (
+          <button className="primary" onClick={() => setEditing('new')}>
+            <Icon name="plus" size={16} /> Add server
+          </button>
+        )}
+      </div>
+
+      <div className="stats">
+        <div className="card stat">
+          <span className="badge-icon">
+            <Icon name="servers" />
+          </span>
+          <div>
+            <div className="value">
+              {connected.length}/{list.length}
+            </div>
+            <div className="label">servers connected</div>
+          </div>
+        </div>
+        <div className="card stat">
+          <span className="badge-icon">
+            <Icon name="tool" />
+          </span>
+          <div>
+            <div className="value">{tools}</div>
+            <div className="label">tools available</div>
+          </div>
+        </div>
+        <div className="card stat">
+          <span className="badge-icon">
+            <Icon name="shield" />
+          </span>
+          <div>
+            <div className="value">{list.filter((s) => s.hasSecret).length}</div>
+            <div className="label">credentials held by the gateway</div>
+          </div>
+        </div>
+      </div>
+
       {editing && (
         <ServerForm
           server={editing === 'new' ? undefined : editing}
@@ -63,59 +114,58 @@ export function Servers({ me }: { me: Me }) {
           }}
         />
       )}
-      {error && <div className="error">{error}</div>}
-      {servers && servers.length === 0 && <p>No servers yet.</p>}
-      {servers && servers.length > 0 && (
-        <table style={{ marginTop: 12 }}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>URL</th>
-              <th>Status</th>
-              <th>Tools</th>
-              {isAdmin && <th></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {servers.map((s) => (
-              <tr key={s.id}>
-                <td>
-                  <Link to={`/servers/${s.id}`}>{s.name}</Link>
-                </td>
-                <td>
-                  <code>{s.slug}</code>
-                </td>
-                <td className="small">{s.url}</td>
-                <td>
-                  {words[s.status]}
-                  {s.status === 'unreachable' && s.lastError && <div className="muted small">{s.lastError}</div>}
-                </td>
-                <td>{s.toolCount}</td>
-                {isAdmin && (
-                  <td>
-                    <div className="row">
-                      <button onClick={() => act(() => api(`/api/servers/${s.id}`, { method: 'PATCH', body: { enabled: !s.enabled } }))}>
-                        {s.enabled ? 'Disable' : 'Enable'}
-                      </button>
-                      <button onClick={() => setEditing(s)}>Edit</button>
-                      <button
-                        onClick={() => {
-                          if (confirm(`Remove ${s.slug}? Its tools disappear for everyone.`)) {
-                            act(() => api(`/api/servers/${s.id}`, { method: 'DELETE' }))
-                          }
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {error && <div className="alert">{error}</div>}
+      {servers && servers.length === 0 && <div className="card empty">No servers yet.</div>}
+
+      <div className="grid">
+        {list.map((s) => (
+          <div key={s.id} className="card server-card">
+            <div className="top">
+              <div>
+                <Link to={`/servers/${s.id}`} className="name">
+                  {s.name}
+                </Link>
+                <div className="url">{s.url}</div>
+              </div>
+              <StatusPill status={s.status} />
+            </div>
+            <div className="meta">
+              <span className="chip">{s.slug}__*</span>
+              <span className="pill indigo">{s.toolCount} tools</span>
+              {s.authType !== 'none' && <span className="pill gray">{s.hasSecret ? 'credential set' : 'no credential'}</span>}
+            </div>
+            {s.status === 'unreachable' && s.lastError && <div className="error">{s.lastError}</div>}
+            <div className="actions">
+              <Link to={`/servers/${s.id}`} className="btn small">
+                View tools
+              </Link>
+              {isAdmin && (
+                <>
+                  <button
+                    className="small"
+                    onClick={() => act(() => api(`/api/servers/${s.id}`, { method: 'PATCH', body: { enabled: !s.enabled } }))}
+                  >
+                    {s.enabled ? 'Disable' : 'Enable'}
+                  </button>
+                  <button className="small" onClick={() => setEditing(s)}>
+                    Edit
+                  </button>
+                  <button
+                    className="small danger"
+                    onClick={() => {
+                      if (confirm(`Remove ${s.slug}? Its tools disappear for everyone.`)) {
+                        act(() => api(`/api/servers/${s.id}`, { method: 'DELETE' }))
+                      }
+                    }}
+                  >
+                    Remove
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </>
   )
 }

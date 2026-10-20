@@ -34,10 +34,10 @@ export function ServerForm({ server, onDone }: { server?: Server; onDone: () => 
   }
 
   return (
-    <form className="box" onSubmit={submit}>
-      <strong>{server ? `Edit ${server.slug}` : 'Add server'}</strong>
+    <form className="card form" onSubmit={submit} style={{ marginBottom: 20, maxWidth: 620 }}>
+      <h2>{server ? `Edit ${server.slug}` : 'Add a server'}</h2>
       <label>
-        Slug (tools show up as slug__tool, cannot be changed later)
+        Slug <span className="hint">tools show up as slug__tool; cannot be changed later</span>
         <input value={slug} onChange={(e) => setSlug(e.target.value)} disabled={Boolean(server)} pattern="[a-z][a-z0-9_]{1,20}" required />
       </label>
       <label>
@@ -45,7 +45,7 @@ export function ServerForm({ server, onDone }: { server?: Server; onDone: () => 
         <input value={name} onChange={(e) => setName(e.target.value)} required />
       </label>
       <label>
-        URL (Streamable HTTP endpoint)
+        URL <span className="hint">Streamable HTTP endpoint</span>
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/mcp" required />
       </label>
       <label>
@@ -70,15 +70,16 @@ export function ServerForm({ server, onDone }: { server?: Server; onDone: () => 
           </label>
         ) : (
           <div className="row">
-            <span>Secret: set</span>
-            <button type="button" onClick={() => setReplacing(true)}>
+            <span className="pill green">Secret set</span>
+            <span className="muted small">stored encrypted, never shown again</span>
+            <button type="button" className="small" onClick={() => setReplacing(true)}>
               Replace
             </button>
           </div>
         ))}
-      {error && <div className="error">{error}</div>}
+      {error && <div className="alert">{error}</div>}
       <div className="row">
-        <button type="submit" disabled={saving}>
+        <button type="submit" className="primary" disabled={saving}>
           {saving ? 'Saving...' : 'Save'}
         </button>
         <button type="button" onClick={onDone}>

@@ -52,14 +52,20 @@ export function Audit({ me }: { me: Me }) {
     }
   }
 
+  const look: Record<string, string> = { ok: 'green', tool_error: 'amber', upstream_error: 'red', timeout: 'red', denied: 'red' }
+
   return (
     <>
-      <h1>Audit log</h1>
-      {!isAdmin && <p className="muted">You see your own calls only.</p>}
-      <div className="row" style={{ marginBottom: 12 }}>
+      <div className="page-head">
+        <div>
+          <h1>Audit log</h1>
+          <p>{isAdmin ? 'Every tool call through the gateway, newest first.' : 'Your own tool calls, newest first.'}</p>
+        </div>
+      </div>
+      <div className="filters">
         {isAdmin && (
           <select value={user} onChange={filter(setUser)}>
-            <option value="">all users</option>
+            <option value="">All users</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.email}
@@ -68,60 +74,66 @@ export function Audit({ me }: { me: Me }) {
           </select>
         )}
         <select value={server} onChange={filter(setServer)}>
-          <option value="">all servers</option>
+          <option value="">All servers</option>
           {slugs.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </select>
         <select value={outcome} onChange={filter(setOutcome)}>
-          <option value="">all outcomes</option>
+          <option value="">All outcomes</option>
           {outcomes.map((o) => (
             <option key={o}>{o}</option>
           ))}
         </select>
       </div>
-      {error && <div className="error">{error}</div>}
-      {rows.length === 0 ? (
-        <p>Nothing logged yet.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>User</th>
-              <th>Via</th>
-              <th>Server</th>
-              <th>Tool</th>
-              <th>Duration (ms)</th>
-              <th>Outcome</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id}>
-                <td>{when(r.startedAt)}</td>
-                <td>{r.user}</td>
-                <td>{r.source}</td>
-                <td>{r.serverSlug}</td>
-                <td>{r.toolName}</td>
-                <td>{r.durationMs}</td>
-                <td>
-                  {r.outcome}
-                  {r.errorMessage && <div className="muted small">{r.errorMessage}</div>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <div className="row" style={{ marginTop: 12 }}>
-        <button disabled={page === 1} onClick={() => setPage(page - 1)}>
-          Newer
-        </button>
-        <span className="muted">page {page}</span>
-        <button disabled={!hasMore} onClick={() => setPage(page + 1)}>
-          Older
-        </button>
+      {error && <div className="alert">{error}</div>}
+      <div className="card flush">
+        {rows.length === 0 ? (
+          <div className="empty">Nothing logged yet.</div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>User</th>
+                  <th>Via</th>
+                  <th>Tool</th>
+                  <th>Duration</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id}>
+                    <td className="muted">{when(r.startedAt)}</td>
+                    <td>{r.user}</td>
+                    <td>
+                      <span className={`pill ${r.source === 'chat' ? 'indigo' : 'gray'}`}>{r.source}</span>
+                    </td>
+                    <td>
+                      <span className="chip">{r.serverSlug ? `${r.serverSlug}__${r.toolName}` : r.toolName}</span>
+                    </td>
+                    <td className="muted">{r.durationMs} ms</td>
+                    <td>
+                      <span className={`pill ${look[r.outcome] ?? 'gray'}`}>{r.outcome}</span>
+                      {r.errorMessage && <div className="muted small" style={{ marginTop: 4 }}>{r.errorMessage}</div>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="pager">
+          <button className="small" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Newer
+          </button>
+          <span className="muted small">Page {page}</span>
+          <button className="small" disabled={!hasMore} onClick={() => setPage(page + 1)}>
+            Older
+          </button>
+        </div>
       </div>
     </>
   )
